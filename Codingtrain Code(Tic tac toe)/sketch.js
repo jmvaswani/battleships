@@ -15,7 +15,9 @@ var bBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0]
 ];
-
+var boats=["patrolboat","battleship","submarine","aircraft carrier","Motherboat"];
+var boatsPlaced=[false,false,false,false,false];
+var boatsSelected=[false,false,false,false,false];
 let board = [
   ['', '', ''],
   ['', '', ''],
@@ -36,7 +38,7 @@ function setup() {
   boardHeight=height*0.567;
   w = boardWidth / 10;
   h = boardHeight / 10;
-  alert(w+","+h);
+ // alert(w+","+h);
   // alert(w*10+10);
   //bestMove();
 }
@@ -86,16 +88,42 @@ function checkWinner() {
   }
 }
 
-function mousePressed() {
-  var i = floor((mouseX-10) / w);
-  var j = floor((mouseY-10) / h);
-  if (j<10 && j>=0)
-    if((i>=0 && i<10)||(i>11 && i<21))
+function getBoatClickedOn(x,y)
+{
+  if(x>90&&x<190)
+  {
+    for(let i=0;i<5;i++)
     {
-      alert(i+","+j+"\n");
-      bBoard[i][j]=1;
+      let boatTextHeight=570+(i*25);
+      if((y>boatTextHeight-15)&&(y<boatTextHeight+5))
+      {
+        //alert("HI");
+        return i;
+      }
     }
-  // if (currentPlayer == human) {
+  }
+  return -1;
+}
+function mousePressed() {
+  var j = floor((mouseX-10) / w);
+  var i = floor((mouseY-10) / h);
+  if (i<10 && i>=0)
+  {
+    if((j>=0 && j<10)||(j>11 && j<21))
+    {
+      bBoard[i][j]=bBoard[i][j]==0?1:0;
+    }
+  }
+  else
+  {
+    let a=getBoatClickedOn(mouseX,mouseY);
+    if(a!=-1)
+    {
+      boatsSelected[a]=boatsSelected[a]==true?false:true;
+    }
+  }
+  //alert(boatsSelected);
+    // if (currentPlayer == human) {
   //   // Human make turn
   //   let i = floor(mouseX / w);
   //   let j = floor(mouseY / h);
@@ -130,20 +158,53 @@ function draw() {
   fill(255);
   text('Player board', 160, 520);
   text('Computer board', 700, 520);
+  for (let i=0;i<5;i++)
+  { 
+    if(boatsPlaced[i]==false)
+    {
+      if(boatsSelected[i]==true)
+      {
+        fill(25);
+        text(boats[i], 100, 570+(i*25));
+        fill(255);
+        continue;
+      }
+      let boatTextHeight=570+(i*25);
+      line(90,boatTextHeight-15,190,boatTextHeight-15);
+      text(boats[i], 100, boatTextHeight);
+      line(90,boatTextHeight+5,190,boatTextHeight+5);
+    }
+  }
+  
   for (let i=0;i<10;i++)
   {
   for (let j=0;j<10;j++)
   {
     if(bBoard[i][j]==1)
     {
-      translate(10+i*h,10+j*w);
+      //translate(10+(j*w),10+(i*w));
       fill(color(204, 102, 0));
-      rect(0, 0, 40, 40);
+      rect( (j*w)+13,(i*h)+13, 40,40);
       translate(0,0);
     }
 
   }
   }
+  for (let i=0;i<10;i++)
+  {
+    for (let j=0;j<10;j++)
+   {
+    if(bBoard[i][j]==1)
+    {
+      //translate(10+(j*w),10+(i*w));
+      fill(color(204, 102, 0));
+      rect( (j*w)+505,(i*h)+13, 40,40);
+      translate(0,0);
+    }
+
+  }
+  }
+  
   //line(w, 0, w, height);
   //line(w * 2, 0, w * 2, height);
   //line(0, h, width, h);
