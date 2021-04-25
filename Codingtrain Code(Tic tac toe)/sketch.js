@@ -17,7 +17,12 @@ var bBoard=[
 ];
 var boats=["patrolboat","battleship","submarine","aircraft carrier","Motherboat"];
 var boatsPlaced=[false,false,false,false,false];
-var boatsSelected=[false,false,false,false,false];
+let boatDirection=0;
+let rotateButtonActivated=false;
+let resetButtonActivated=false;
+let startButtonActivated=false;
+const boatLenghts=[2,3,3,4,5];
+var boatSelected=-1;//[false,false,false,false,false];
 let board = [
   ['', '', ''],
   ['', '', ''],
@@ -88,6 +93,56 @@ function checkWinner() {
   }
 }
 
+function getButtonClickedOn(x,y)
+{
+   if(x>=398&&x<=545)
+  {
+    if(y>525&&y<545)
+    {
+      if(x>398&&x<440)
+      {
+        return 1;  //1 for rotate
+      }
+      else if(x>478&&x<520)
+      {
+        return 2;  //2 for rotate
+      }
+      else if(x>548&&x<590)
+      {
+        return 3;  //3 for rotate
+      }
+    }
+  }
+  return -1;
+}
+
+function handleButtons(a)
+{
+  if(a==1&&rotateButtonActivated)
+  {
+    boatDirection=boatDirection==0?1:0;
+  }
+  else if(a==2&&resetButtonActivated)
+  {
+   
+    for (let i =0;i<5;i++)
+    {
+      boatsPlaced[i]=false;
+    }
+    boatSelected=-1;
+    for(let i=0;i<10;i++)
+    {
+      for(let j=0;j<10;j++)
+      {
+        bBoard[i][j]=0;
+      }
+    }
+  }
+  else if(a==3&&startButtonActivated)
+  {
+    //Start code
+  }
+}
 function getBoatClickedOn(x,y)
 {
   if(x>90&&x<190)
@@ -109,20 +164,65 @@ function mousePressed() {
   var i = floor((mouseY-10) / h);
   if (i<10 && i>=0)
   {
-    if((j>=0 && j<10)||(j>11 && j<21))
+    if(j>=0 && j<10)
+    {
+      if(boatSelected!=-1)
+      {
+        if(boatDirection==0)
+        {
+        if(i<=10-boatLenghts[boatSelected])
+        {
+          for(let k=0;k<boatLenghts[boatSelected];k++)
+          {
+            bBoard[i+k][j]=1;
+          }
+          boatsPlaced[boatSelected]=true;
+          boatSelected=-1;
+        }
+        else{
+          alert("Invalid placement");
+        }
+      }
+      else
+      {
+        if(j<=10-boatLenghts[boatSelected])
+        {
+          for(let k=0;k<boatLenghts[boatSelected];k++)
+          {
+            bBoard[i][j+k]=1;
+          }
+          boatsPlaced[boatSelected]=true;
+          boatSelected=-1;
+        }
+        else{
+          alert("Invalid placement");
+        }
+      }
+      }
+    }
+    /*if((j>=0 && j<10)||(j>11 && j<21))
     {
       bBoard[i][j]=bBoard[i][j]==0?1:0;
-    }
+    }*/
   }
-  else
+  else if(getBoatClickedOn(mouseX,mouseY)!=-1)
   {
     let a=getBoatClickedOn(mouseX,mouseY);
     if(a!=-1)
     {
-      boatsSelected[a]=boatsSelected[a]==true?false:true;
+      if(boatsPlaced[a]==false)
+        boatSelected=a;
     }
   }
-  //alert(boatsSelected);
+  else
+  {
+    let a=getButtonClickedOn(mouseX,mouseY);
+    if(a!=-1)
+    {
+      handleButtons(a);
+    }
+  }
+  //alert(boatSelected);
     // if (currentPlayer == human) {
   //   // Human make turn
   //   let i = floor(mouseX / w);
@@ -135,13 +235,17 @@ function mousePressed() {
   //   }
   // }
 }
-
+/*function getBoatSelected(){
+  for(let i=0;i<5;i++)
+  if(boats)
+}*/
 function draw() {
   let tH=10;
   let tW=10;
   background(0);
   stroke(255);
   strokeWeight(4);
+//************************************************Drawing boards and labels
   for(let i=0;i<=10;i++)
   {
     line(w*i+tW,0+tH,w*i+tW,boardHeight+tH);
@@ -162,7 +266,7 @@ function draw() {
   { 
     if(boatsPlaced[i]==false)
     {
-      if(boatsSelected[i]==true)
+      if(boatSelected==i)
       {
         fill(25);
         text(boats[i], 100, 570+(i*25));
@@ -175,20 +279,63 @@ function draw() {
       line(90,boatTextHeight+5,190,boatTextHeight+5);
     }
   }
-  
-  for (let i=0;i<10;i++)
+//************************************************* Drawing 3 Buttons
+  if(boatSelected!=-1)
   {
-  for (let j=0;j<10;j++)
-  {
-    if(bBoard[i][j]==1)
-    {
-      //translate(10+(j*w),10+(i*w));
-      fill(color(204, 102, 0));
-      rect( (j*w)+13,(i*h)+13, 40,40);
-      translate(0,0);
-    }
-
+    rotateButtonActivated=true;
+    fill(230, 230, 0);
+    line(398,525,440,525);
+    text('Rotate', 400, 540);
+    line(398,545,440,545);
+    fill(255);
   }
+  else
+    rotateButtonActivated=false;
+  let boatsPlacedCount=0;
+  for(let i=0;i<5;i++)
+  {
+    if(boatsPlaced[i]==true)
+      boatsPlacedCount++;
+  }
+  
+  if(boatsPlacedCount>0)
+  {
+    resetButtonActivated=true;
+    fill(255, 51, 51);
+    line(478,525,520,525);
+    text('Reset', 480, 540);
+    line(478,545,520,545)
+    fill(255);
+  }
+  else
+    resetButtonActivated=false
+  
+  if(boatsPlacedCount==5)
+  {
+    startButtonActivated=true;
+    fill(102, 255, 102);
+    line(548,525,590,525);
+    text('Start', 550, 540);
+    line(548,545,590,545)
+    fill(255);
+  }
+  else
+    startButtonActivated=false;
+
+//***************************************************Drawing selected boxes if any
+    for (let i=0;i<10;i++)
+  {
+    for (let j=0;j<10;j++)
+    {
+      if(bBoard[i][j]==1)
+      {
+        //translate(10+(j*w),10+(i*w));
+        fill(color(204, 102, 0));
+        rect( (j*w)+13,(i*h)+13, 40,40);
+        translate(0,0);
+      }
+
+    }
   }
   for (let i=0;i<10;i++)
   {
@@ -204,7 +351,52 @@ function draw() {
 
   }
   }
-  
+
+  //*********************************** Drawing selected ship on board for placement
+  if(boatSelected!=-1)
+  {
+    var j = floor((mouseX-10) / w);
+    var i = floor((mouseY-10) / h);
+    if (i<10 && i>=0)
+    {
+      if(j>=0 && j<10)
+      { 
+          if(boatDirection==0)
+          {
+            fill(color(204, 102, 0));
+            for(let k=0;k<boatLenghts[boatSelected];k++)
+            {
+              rect( (j*w)+13,((i+k)*h)+13, 40,40);        
+            }
+          }
+          else if(boatDirection==1)
+          {
+            fill(color(204, 102, 0));
+            for(let k=0;k<boatLenghts[boatSelected];k++)
+            {
+              rect( ((j+k)*w)+13,((i)*h)+13, 40,40);        
+            }
+          }
+      }
+    }
+
+    /*if (
+      mouseX > bx - boxSize &&
+      mouseX < bx + boxSize &&
+      mouseY > by - boxSize &&
+      mouseY < by + boxSize
+    ) {
+      overBox = true;
+      if (!locked) {
+        stroke(255);
+        fill(244, 122, 158);
+      }
+    } else {
+      stroke(156, 39, 176);
+      fill(244, 122, 158);
+      overBox = false;
+    }*/
+  }
   //line(w, 0, w, height);
   //line(w * 2, 0, w * 2, height);
   //line(0, h, width, h);
