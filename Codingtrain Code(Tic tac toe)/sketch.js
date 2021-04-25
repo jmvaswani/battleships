@@ -3,7 +3,14 @@
 // https://thecodingtrain.com/CodingChallenges/154-tic-tac-toe-minimax.html
 // https://youtu.be/I64-UTORVfU
 // https://editor.p5js.org/codingtrain/sketches/0zyUhZdJD
-var bBoard=[
+
+//0 black
+//
+//
+//
+//
+
+var playerBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0],
@@ -15,13 +22,32 @@ var bBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0]
 ];
+var computerBoard=[
+  [0,0,1,1,1,0,0,1,0,0],
+  [0,0,0,0,0,0,0,1,0,0],
+  [0,0,1,0,0,0,0,0,0,0],
+  [0,0,1,0,0,0,0,0,0,0],
+  [0,0,1,0,0,0,0,0,0,0],
+  [0,0,1,0,0,0,0,0,1,0],
+  [0,0,1,0,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0,1,0],
+  [0,1,1,1,1,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0]
+];
+//************* Boat data
 var boats=["patrolboat","battleship","submarine","aircraft carrier","Motherboat"];
 var boatsPlaced=[false,false,false,false,false];
+var playerBoatsPositions=[[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
+var computerBoatsPositions=[[0,7,0],[0,2,1],[5,8,0],[8,1,1],[2,2,0]];    //i,j,(0 for vertical,1 for horizontal)
+const boatLenghts=[2,3,3,4,5];
+var playerBoatsAlive=[true,true,true,true,true];
+var computerBoatsAlive=[true,true,true,true,true];
+//*************
 let boatDirection=0;
+
 let rotateButtonActivated=false;
 let resetButtonActivated=false;
 let startButtonActivated=false;
-const boatLenghts=[2,3,3,4,5];
 var boatSelected=-1;//[false,false,false,false,false];
 let board = [
   ['', '', ''],
@@ -134,7 +160,7 @@ function handleButtons(a)
     {
       for(let j=0;j<10;j++)
       {
-        bBoard[i][j]=0;
+        playerBoard[i][j]=0;
       }
     }
   }
@@ -172,12 +198,26 @@ function mousePressed() {
         {
         if(i<=10-boatLenghts[boatSelected])
         {
+          let f=0;
           for(let k=0;k<boatLenghts[boatSelected];k++)
           {
-            bBoard[i+k][j]=1;
+            if(playerBoard[i+k][j]==1)
+            {
+              f=1;
+            }
           }
-          boatsPlaced[boatSelected]=true;
-          boatSelected=-1;
+          if(f==1)
+            alert("Boat overlap");
+          else
+          {
+            for(let k=0;k<boatLenghts[boatSelected];k++)
+            {
+              playerBoard[i+k][j]=1;
+            }
+            playerBoatsPositions[boatSelected]=[i,j,boatDirection];
+            boatsPlaced[boatSelected]=true;
+            boatSelected=-1;
+          }
         }
         else{
           alert("Invalid placement");
@@ -187,12 +227,26 @@ function mousePressed() {
       {
         if(j<=10-boatLenghts[boatSelected])
         {
+          let f=0;
           for(let k=0;k<boatLenghts[boatSelected];k++)
           {
-            bBoard[i][j+k]=1;
+            if(playerBoard[i][j+k]==1)
+            {
+              f=1;
+            }
           }
+          if(f==1)
+            alert("Boat overlap");
+          else
+          {
+          for(let k=0;k<boatLenghts[boatSelected];k++)
+          {
+            playerBoard[i][j+k]=1;
+          }
+          playerBoatsPositions[boatSelected]=[i,j,boatDirection];
           boatsPlaced[boatSelected]=true;
           boatSelected=-1;
+          }
         }
         else{
           alert("Invalid placement");
@@ -202,7 +256,7 @@ function mousePressed() {
     }
     /*if((j>=0 && j<10)||(j>11 && j<21))
     {
-      bBoard[i][j]=bBoard[i][j]==0?1:0;
+      playerBoard[i][j]=playerBoard[i][j]==0?1:0;
     }*/
   }
   else if(getBoatClickedOn(mouseX,mouseY)!=-1)
@@ -327,7 +381,7 @@ function draw() {
   {
     for (let j=0;j<10;j++)
     {
-      if(bBoard[i][j]==1)
+      if(playerBoard[i][j]==1)
       {
         //translate(10+(j*w),10+(i*w));
         fill(color(204, 102, 0));
@@ -341,10 +395,10 @@ function draw() {
   {
     for (let j=0;j<10;j++)
    {
-    if(bBoard[i][j]==1)
+    if(computerBoard[i][j]==1)
     {
       //translate(10+(j*w),10+(i*w));
-      fill(color(204, 102, 0));
+      fill(color(50, 101, 201));
       rect( (j*w)+505,(i*h)+13, 40,40);
       translate(0,0);
     }
@@ -379,7 +433,16 @@ function draw() {
           }
       }
     }
-
+  }
+//***************************************************** Instructions
+fill(255);
+textSize(20);
+text("Instructions",450,600);
+text("1)Select a ship",435,630);
+text("2)Place on board(with/without rotate)",435,660);
+text("3)Place all ships",435,690);
+text("4)Click on start and play!",435,720);
+textSize(12);
     /*if (
       mouseX > bx - boxSize &&
       mouseX < bx + boxSize &&
@@ -396,7 +459,6 @@ function draw() {
       fill(244, 122, 158);
       overBox = false;
     }*/
-  }
   //line(w, 0, w, height);
   //line(w * 2, 0, w * 2, height);
   //line(0, h, width, h);
@@ -432,4 +494,29 @@ function draw() {
       resultP.html(`${result} wins!`);
     }
   }*/
+}
+//###########################################AI logic and functions
+function playerFire(i,j)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
+{
+    // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
+    // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
+}  
+
+function computerTurn()      
+{
+  /*
+  Function returns [i,j] to indicate where to hit
+  Decided based on
+  1)adjacent squares of already hit tiles(hit tiles do not count if ship destroyed)
+  2)Random generated intelligent [i,j] such that it neglects  impossible places(single tiles)
+  */
+}
+
+function checkWin()      
+{
+  /*
+  return 0 if Non conclusive
+  return 1 if player win                  // use playerboatsalive and computerboats alive
+  return 2 if computer win 
+  */
 }
