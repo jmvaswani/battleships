@@ -5,10 +5,10 @@
 // https://editor.p5js.org/codingtrain/sketches/0zyUhZdJD
 
 //0 black
-//
-//
-//
-//
+//1 ship placed
+//2 fire (miss)
+//3 fire (hit)
+//4 fire (Destroyed)
 
 var playerBoard=[
   [0,0,0,0,0,0,0,0,0,0],
@@ -69,6 +69,7 @@ function setup() {
   boardHeight=height*0.567;
   w = boardWidth / 10;
   h = boardHeight / 10;
+  placeComputerBoats();
  // alert(w+","+h);
   // alert(w*10+10);
   //bestMove();
@@ -518,5 +519,14 @@ function checkWin()
   return 0 if Non conclusive
   return 1 if player win                  // use playerboatsalive and computerboats alive
   return 2 if computer win 
+  */
+}
+
+function placeComputerBoats()
+{
+  /*
+  Select a boat
+  Place it on the Computer board(Random position,random direction,Overlap condition,Overflow condition)
+  //Make changes in computerBoard, make changes in computerBoatsPositions
   */
 }
