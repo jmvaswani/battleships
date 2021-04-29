@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+</head>
+<body>
+
+	<script type="text/javascript">
+	x = [1,2,3,4]
+	y = x[1]
+	console.log(y,x.shift())//shift => dequeue    ;; pop() => pop   ;; push
+	console.log(x)
+
+	x.push([11,12])
+	console.log(x)
+
+
+	availableMoves={   //has available moves => choose random moves from here to avoid conflicts
+  	0 : [0,1,2,3,4,5,6,7,8,9],
+  	1 : [0,1,2,3,4,5,6,7,8,9],
+  	2 : [0,1,2,3,4,5,6,7,8,9],
+  	3 : [0,1,2,3,4,5,6,7,8,9],
+  	4 : [0,1,2,3,4,5,6,7,8,9],
+  	5 : [0,1,2,3,4,5,6,7,8,9],
+  	6 : [0,1,2,3,4,5,6,7,8,9],
+  	7 : [0,1,2,3,4,5,6,7,8,9],
+  	8 : [0,1,2,3,4,5,6,7,8,9],
+  	9 : [0,1,2,3,4,5,6,7,8,9],
+  	};
+
+	console.log(availableMoves[0].splice(2,1)) //only remove 1 element
+	console.log(availableMoves)
+	console.log(x.indexOf(4))
+
+
+	</script>
+
+</body>
+</html>

@@ -34,6 +34,21 @@ var computerBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0]
 ];
+
+availableMoves={   //has available moves => choose random moves from here to avoid conflicts
+    0 : [0,1,2,3,4,5,6,7,8,9],
+    1 : [0,1,2,3,4,5,6,7,8,9],
+    2 : [0,1,2,3,4,5,6,7,8,9],
+    3 : [0,1,2,3,4,5,6,7,8,9],
+    4 : [0,1,2,3,4,5,6,7,8,9],
+    5 : [0,1,2,3,4,5,6,7,8,9],
+    6 : [0,1,2,3,4,5,6,7,8,9],
+    7 : [0,1,2,3,4,5,6,7,8,9],
+    8 : [0,1,2,3,4,5,6,7,8,9],
+    9 : [0,1,2,3,4,5,6,7,8,9],
+  };
+
+
 //************* Boat data
 var boats=["patrolboat","battleship","submarine","aircraft carrier","Motherboat"];
 var boatsPlaced=[false,false,false,false,false];
@@ -42,6 +57,9 @@ var computerBoatsPositions=[[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-
 const boatLenghts=[2,3,3,4,5];
 var playerBoatsAlive=[true,true,true,true,true];
 var computerBoatsAlive=[true,true,true,true,true];
+var probableMoves = []  //will have position + direction   => eg. if i,j is a hit , then mark (i-1,j,"up")  to indicate to hit only in the up direction next
+var bufferMoves = []  //to store only the possibleMoves of a particular position and its adjacent (if any one of the moves in bufferMoves is a hit then add to possibleMoves)
+
 //*************
 let boatDirection=0;
 
@@ -436,72 +454,45 @@ function draw() {
     }
   }
 //***************************************************** Instructions
-fill(255);
-textSize(20);
-text("Instructions",450,600);
-text("1)Select a ship",435,630);
-text("2)Place on board(with/without rotate)",435,660);
-text("3)Place all ships",435,690);
-text("4)Click on start and play!",435,720);
-textSize(12);
-    /*if (
-      mouseX > bx - boxSize &&
-      mouseX < bx + boxSize &&
-      mouseY > by - boxSize &&
-      mouseY < by + boxSize
-    ) {
-      overBox = true;
-      if (!locked) {
-        stroke(255);
-        fill(244, 122, 158);
-      }
-    } else {
-      stroke(156, 39, 176);
-      fill(244, 122, 158);
-      overBox = false;
-    }*/
-  //line(w, 0, w, height);
-  //line(w * 2, 0, w * 2, height);
-  //line(0, h, width, h);
-  //line(0, h * 2, width, h * 2);
-  //line(0+tW,0+tH,boardWidth+tW,0+tH);
-  // line(0+tW,0+tH,0+tW,boardHeight+tH);
-  // line(0,boardHeight+tH,boardWidth,boardHeight+tH);
-  // line(boardWidth+tW,boardHeight+tH,boardWidth+tW,0);
-  /*for (let j = 0; j < 3; j++) {
-    for (let i = 0; i < 3; i++) {
-      let x = w * i + w / 2;
-      let y = h * j + h / 2;
-      let spot = board[i][j];
-      textSize(32);
-      let r = w / 4;
-      if (spot == human) {
-        noFill();
-        ellipse(x, y, r * 2);
-      } else if (spot == ai) {
-        line(x - r, y - r, x + r, y + r);
-        line(x + r, y - r, x - r, y + r);
-      }
-    }
-  }*/
-/*  let result = checkWinner();
-  if (result != null) {
-    noLoop();
-    let resultP = createP('');
-    resultP.style('font-size', '32pt');
-    if (result == 'tie') {
-      resultP.html('Tie!');
-    } else {
-      resultP.html(`${result} wins!`);
-    }
-  }*/
+  fill(255);
+  textSize(20);
+  text("Instructions",450,600);
+  text("1)Select a ship",435,630);
+  text("2)Place on board(with/without rotate)",435,660);
+  text("3)Place all ships",435,690);
+  text("4)Click on start and play!",435,720);
+  textSize(12);
+
 }
 //###########################################AI logic and functions
 function playerFire(i,j)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
-    // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
+    // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, 
+    // as well as change status in computerBoatsAlive
     // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
 }  
+
+function opposite(direction)
+{
+  if(direction == "up")
+    return("down");
+  else if(direction == "down")
+    return("up");
+  else if(direction == "right")
+    return("left");
+  else if(direction == "left")
+    return("right");
+}
+
+function remove(row,column)
+{
+  colIndex = availableMoves[row].indexOf(column);
+  if (colIndex!=-1)
+    availableMoves[row].splice(column, 1);
+  else
+    console.log("Some error Occured for "+row,colIndex); 
+
+}
 
 function computerTurn()      
 {
@@ -511,6 +502,130 @@ function computerTurn()
   1)adjacent squares of already hit tiles(hit tiles do not count if ship destroyed)
   2)Random generated intelligent [i,j] such that it neglects  impossible places(single tiles)
   */
+
+  if(bufferMoves.length > 0) //play move in bufferMoves ;  check if hit/miss ; if hit => add (move+direction) & (oppositeMove+direction) to probableMoves ; clear buffer
+  {
+    tuple = bufferMoves.shift();
+    row = tuple[0];
+    column = tuple[1];
+    direction = tuple[2]; //string "up","down","right","left"
+
+    //fire current block
+    fire(row,column,"AI");
+
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+      //add opposite side if possible
+      opposite = opposite(direction)
+      for(i=0;i<bufferMoves.length;i++)
+      {
+        if(bufferMoves[i][2] == opposite)
+          probableMoves.push(bufferMoves[i]);
+      }
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+      
+      //clear Buffer
+      bufferMoves = [];
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+  }
+
+  else if(probableMoves.length>0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
+  {
+    tuple = probableMoves.shift();
+    row = tuple[0];
+    column = tuple[1];
+    direction = tuple[2];
+
+    //fire current block
+    fire(row,column,"AI");
+    
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+
+      //add the next block of the same direction
+      if(direction == "up")
+        if(row>0)
+          probableMoves.push([row-1,column,"up"]);
+      //left
+      if(direction == "left")
+        if(column>0)
+          probableMoves.push([row,column-1,"left"]);
+      //down
+      if(direction == "down")
+        if(row<9)
+          probableMoves.push([row+1,column,"down"]);
+      //right
+      if(direction == "right")
+        if(column<9)
+          probableMoves.push([row,column+1,"right"]);
+
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+
+  }
+
+  else //play random move => check for hit/miss ; if hit=> add moves to buffer with direction
+  { 
+    column=-1
+    do
+    {
+      rowIndex = Math.floor(Math.random() * 10);
+      if(availableMoves[rowIndex].length > 0 )
+        columnIndex = Math.floor(Math.random() * availableMoves[row].length);  //only choose a column number  
+
+    }while(columnIndex==-1)
+
+    row = rowIndex;
+    column = availableMoves[row][columnIndex];
+
+    //fire current block
+    fire(row,column,"AI");
+
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+      //add the adjacent blocks in bufferMoves
+      //up
+      if(row>0)
+        bufferMoves.push([row-1,column,"up"]);
+      //left
+      if(column>0)
+        bufferMoves.push([row,column-1,"left"]);
+      //down
+      if(row<9)
+        bufferMoves.push([row+1,column,"down"]);
+      //right
+      if(column<9)
+        bufferMoves.push([row,column+1,"right"]);
+
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+  }
+
+
 }
 
 function checkWin()      
@@ -522,6 +637,83 @@ function checkWin()
   */
 }
 
+function placeBoatVertical(direction,length,i)
+{
+  let flag=0
+  let cordinateI;
+  let cordinateJ;
+  do
+  {
+    flag=0
+    cordinateI = Math.floor(Math.random() * 10);
+    cordinateJ = Math.floor(Math.random() * 10);
+
+    if(cordinateI+length < 10)
+    {
+      for(j=0; j<length; j++)
+      {
+        if(computerBoard[cordinateI+j][cordinateJ] != 0)
+        {
+          flag = 1;
+          continue;
+        }
+      }
+    }
+    else
+      flag=1;
+  }while(flag!=0);
+
+  for(j=0; j<length; j++)
+  {
+    computerBoard[cordinateI+j][cordinateJ] = 1;
+  }
+  computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
+  
+}
+
+function placeBoatHorizontal(direction,length,i)
+{
+  let flag=0
+  let cordinateI;
+  let cordinateJ;
+  do
+  {
+    flag=0
+    cordinateI = Math.floor(Math.random() * 10);
+    cordinateJ = Math.floor(Math.random() * 10);
+
+    if(cordinateJ+length < 10)
+    {
+      for(j=0; j<length; j++)
+      {
+        if(computerBoard[cordinateI][cordinateJ+j] != 0)
+        {
+          flag = 1;
+          continue;
+        }
+      }
+    }
+    else
+      flag=1;
+  }while(flag!=0);
+
+  for(j=0; j<length; j++)
+  {
+    computerBoard[cordinateI][cordinateJ+j] = 1;
+  }
+  computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
+}
+
+function placeBoat(direction,length,i)
+{
+  console.log("Check here");
+  if(direction == 0)
+    placeBoatVertical(direction,length,i);
+  else
+    placeBoatHorizontal(direction,length,i);
+}
+
+
 function placeComputerBoats()
 {
   /*
@@ -530,94 +722,17 @@ function placeComputerBoats()
   //Make changes in computerBoard, make changes in computerBoatsPositions
   */
  var length;
- var cordinateI;
- var cordinateJ;
  var direction;
  var i;
- var j;
- var k;
- var flag;
  for(i=0; i<5; i++)
  {
    length = boatLenghts[i];
    
-   //create a function to place the boat in a specific direction and let it loop
    direction = Math.floor(Math.random() * 2);
-   cordinateI = Math.floor(Math.random() * 10);
-   cordinateJ = Math.floor(Math.random() * 10);
-   if(direction == 0)   //Vertical
-   {
-     if(cordinateI+length < 10)
-     {
-       for(j=0; j<length; j++)
-       {
-         if(computerBoard[cordinateI+j][cordinateJ] != 0)
-         {
-           flag = 1;
-           break;
-         }
-       }
-
-       if(flag == 0)
-       {
-         for(j=0; j<length; j++)
-         {
-           computerBoard[cordinateI+j][cordinateJ] = 1;
-         }
-        computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
-       }
-       else
-       {
-         i--;
-       }
-    }
-    else
-    {
-      i--;
-    }
-  }
-
-
-  else if(direction == 1)
-  {
-    console.log(length);
-    if(cordinateJ+length < 10)
-    {
-      for(k=0; k<length; k++)
-      {
-        if(computerBoard[cordinateI][cordinateJ+k] == 0)
-        {
-          flag = 0;
-        }
-        else
-        {
-          flag = 1;
-          break;
-        }
-      }
-      if(flag == 0)
-      {
-        for(k=0; k<length; k++)
-        {
-          computerBoard[cordinateI][cordinateJ+k] = 1;
-        }
-        computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
-      }
-      else
-      {
-        i--;
-      }
-    }
-     else
-     {
-       i--;
-     }
-   }
-  //  console.log(direction);
-  //  for(k=0; k<10; k++)
-  //  {
-  //   direction = Math.floor(Math.random() * 2);
-  //   console.log(direction);
-  //  }
+   //create a function to place the boat in a specific direction and let it loop
+   //call a func to place the boats
+   console.log("Check here");
+   placeBoat(direction,length,i);
  }
+
 }
