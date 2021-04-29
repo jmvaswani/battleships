@@ -42,6 +42,8 @@ var computerBoatsPositions=[[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-
 const boatLenghts=[2,3,3,4,5];
 var playerBoatsAlive=[true,true,true,true,true];
 var computerBoatsAlive=[true,true,true,true,true];
+var computerBoatsPoints=[];
+var flag = [0,0,0,0,0];
 //*************
 let boatDirection=0;
 
@@ -62,6 +64,8 @@ let boardHeight;
 let ai = 'X';
 let human = 'O';
 let currentPlayer = human;
+var navin;
+var malay;
 
 function setup() {
   createCanvas(1000, 800);
@@ -70,6 +74,18 @@ function setup() {
   w = boardWidth / 10;
   h = boardHeight / 10;
   placeComputerBoats();
+
+  // for(let a=0; a<10; a++)
+  // {
+  //   for(let b=0; b<10; b++)
+  //   {
+  //     navin = Math.floor(Math.random() * 10);
+  //     malay = Math.floor(Math.random() * 10);
+  //     playerFire(navin,malay, 'h');
+  //     console.log(navin,malay);
+  //   }
+  // }
+
  // alert(w+","+h);
   // alert(w*10+10);
   //bestMove();
@@ -151,7 +167,7 @@ function handleButtons(a)
   }
   else if(a==2&&resetButtonActivated)
   {
-   
+
     for (let i =0;i<5;i++)
     {
       boatsPlaced[i]=false;
@@ -318,7 +334,7 @@ function draw() {
   text('Player board', 160, 520);
   text('Computer board', 700, 520);
   for (let i=0;i<5;i++)
-  { 
+  {
     if(boatsPlaced[i]==false)
     {
       if(boatSelected==i)
@@ -326,6 +342,7 @@ function draw() {
         fill(25);
         text(boats[i], 100, 570+(i*25));
         fill(255);
+
         continue;
       }
       let boatTextHeight=570+(i*25);
@@ -352,7 +369,7 @@ function draw() {
     if(boatsPlaced[i]==true)
       boatsPlacedCount++;
   }
-  
+
   if(boatsPlacedCount>0)
   {
     resetButtonActivated=true;
@@ -364,7 +381,7 @@ function draw() {
   }
   else
     resetButtonActivated=false
-  
+
   if(boatsPlacedCount==5)
   {
     startButtonActivated=true;
@@ -402,8 +419,15 @@ function draw() {
       fill(color(50, 101, 201));
       rect( (j*w)+505,(i*h)+13, 40,40);
       translate(0,0);
+    }else if(computerBoard[i][j]==3){
+      fill(color(0, 128, 0));
+      rect( (j*w)+505,(i*h)+13, 40,40);
+      translate(0,0);
+    }else if(computerBoard[i][j]==4){
+      fill(color(255, 0, 0));
+      rect( (j*w)+505,(i*h)+13, 40,40);
+      translate(0,0);
     }
-
   }
   }
 
@@ -415,13 +439,13 @@ function draw() {
     if (i<10 && i>=0)
     {
       if(j>=0 && j<10)
-      { 
+      {
           if(boatDirection==0)
           {
             fill(color(204, 102, 0));
             for(let k=0;k<boatLenghts[boatSelected];k++)
             {
-              rect( (j*w)+13,((i+k)*h)+13, 40,40);        
+              rect( (j*w)+13,((i+k)*h)+13, 40,40);
             }
           }
           else if(boatDirection==1)
@@ -429,7 +453,7 @@ function draw() {
             fill(color(204, 102, 0));
             for(let k=0;k<boatLenghts[boatSelected];k++)
             {
-              rect( ((j+k)*w)+13,((i)*h)+13, 40,40);        
+              rect( ((j+k)*w)+13,((i)*h)+13, 40,40);
             }
           }
       }
@@ -497,13 +521,75 @@ textSize(12);
   }*/
 }
 //###########################################AI logic and functions
-function playerFire(i,j)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
+function playerFire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
+  var k;
+  var l;
     // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
     // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
-}  
+    if(player == 'h')
+    {
+      if(computerBoard[i][j] == 0)
+      {
+        computerBoard[i][j] = 2;
+      }else if(computerBoard[i][j] == 1){
+        computerBoard[i][j] = 3;
+        for(k = 0; k< computerBoatsPoints.length; k++){
+          // console.log("HEllo");
+          if(i == computerBoatsPoints[k][1] && j == computerBoatsPoints[k][2]){
+            // console.log("HEllo");
+            switch(computerBoatsPoints[k][0]){
+              case "patrolboat":
+                flag[0]++;
+                if(flag[0] == 2){
+                  for(l=0; l<2;l++){
+                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
+                  }
+                }
+                break;
+              case "battleship":
+                flag[1]++;
+                if(flag[1] == 3){
+                  for(l=2; l<5;l++){
+                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
+                  }
+                }
+                break;
+              case "submarine":
+                flag[2]++;
+                if(flag[2] == 3){
+                  for(let l=5; l<8;l++){
+                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
+                  }
+                }
+                break;
+              case "aircraft carrier":
+                flag[3]++;
+                if(flag[3] == 4){
+                  for(let l=8; l<12;l++){
+                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
+                  }
+                }
+                console.log("hello");
+                break;
+              case "Motherboat":
+                flag[4]++;
+                if(flag[4] == 5){
+                  for(let l=12; l<17;l++){
+                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
+                  }
+                }
+                break;
+            }
+          }
+        }
+      }
+    }else{
 
-function computerTurn()      
+    }
+  }
+
+function computerTurn()
 {
   /*
   Function returns [i,j] to indicate where to hit
@@ -513,12 +599,12 @@ function computerTurn()
   */
 }
 
-function checkWin()      
+function checkWin()
 {
   /*
   return 0 if Non conclusive
   return 1 if player win                  // use playerboatsalive and computerboats alive
-  return 2 if computer win 
+  return 2 if computer win
   */
 }
 
@@ -563,6 +649,7 @@ function placeComputerBoats()
          for(j=0; j<length; j++)
          {
            computerBoard[cordinateI+j][cordinateJ] = 1;
+           computerBoatsPoints.push([boats[i],cordinateI+j,cordinateJ]);
          }
         computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
        }
@@ -580,7 +667,7 @@ function placeComputerBoats()
 
   else if(direction == 1)
   {
-    console.log(length);
+    // console.log(length);
     if(cordinateJ+length < 10)
     {
       for(k=0; k<length; k++)
@@ -600,6 +687,7 @@ function placeComputerBoats()
         for(k=0; k<length; k++)
         {
           computerBoard[cordinateI][cordinateJ+k] = 1;
+          computerBoatsPoints.push([boats[i],cordinateI,cordinateJ+k]);
         }
         computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
       }
@@ -620,4 +708,6 @@ function placeComputerBoats()
   //   console.log(direction);
   //  }
  }
+ console.log(computerBoatsPoints);
+//  console.log(computerBoatsPoints[0][1]);
 }
