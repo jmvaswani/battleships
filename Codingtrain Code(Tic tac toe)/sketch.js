@@ -589,7 +589,29 @@ function playerFire(i,j,player)      // 0<= I and J <=9    (Function scans compu
     }
   }
 
-function computerTurn()
+function opposite(direction)
+{
+  if(direction == "up")
+    return("down");
+  else if(direction == "down")
+    return("up");
+  else if(direction == "right")
+    return("left");
+  else if(direction == "left")
+    return("right");
+}
+
+function remove(row,column)
+{
+  colIndex = availableMoves[row].indexOf(column);
+  if (colIndex!=-1)
+    availableMoves[row].splice(column, 1);
+  else
+    console.log("Some error Occured for "+row,colIndex); 
+
+}
+
+function computerTurn()      
 {
   /*
   Function returns [i,j] to indicate where to hit
@@ -597,6 +619,128 @@ function computerTurn()
   1)adjacent squares of already hit tiles(hit tiles do not count if ship destroyed)
   2)Random generated intelligent [i,j] such that it neglects  impossible places(single tiles)
   */
+
+  if(bufferMoves.length > 0) //play move in bufferMoves ;  check if hit/miss ; if hit => add (move+direction) & (oppositeMove+direction) to probableMoves ; clear buffer
+  {
+    tuple = bufferMoves.shift();
+    row = tuple[0];
+    column = tuple[1];
+    direction = tuple[2]; //string "up","down","right","left"
+
+    //fire current block
+    fire(row,column,"c");
+
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+      //add opposite side if possible
+      opposite = opposite(direction)
+      for(i=0;i<bufferMoves.length;i++)
+      {
+        if(bufferMoves[i][2] == opposite)
+          probableMoves.push(bufferMoves[i]);
+      }
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+      
+      //clear Buffer
+      bufferMoves = [];
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+  }
+
+  else if(probableMoves.length>0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
+  {
+    tuple = probableMoves.shift();
+    row = tuple[0];
+    column = tuple[1];
+    direction = tuple[2];
+
+    //fire current block
+    fire(row,column,"c");
+    
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+
+      //add the next block of the same direction
+      if(direction == "up")
+        if(row>0)
+          probableMoves.push([row-1,column,"up"]);
+      //left
+      if(direction == "left")
+        if(column>0)
+          probableMoves.push([row,column-1,"left"]);
+      //down
+      if(direction == "down")
+        if(row<9)
+          probableMoves.push([row+1,column,"down"]);
+      //right
+      if(direction == "right")
+        if(column<9)
+          probableMoves.push([row,column+1,"right"]);
+
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+
+  }
+
+  else //play random move => check for hit/miss ; if hit=> add moves to buffer with direction
+  { 
+    column=-1
+    do
+    {
+      rowIndex = Math.floor(Math.random() * 10);
+      if(availableMoves[rowIndex].length > 0 )
+        columnIndex = Math.floor(Math.random() * availableMoves[row].length);  //only choose a column number  
+
+    }while(columnIndex==-1)
+
+    row = rowIndex;
+    column = availableMoves[row][columnIndex];
+
+    //fire current block
+    fire(row,column,"c");
+
+    if(playerBoard[row][column] == 1) // Fire hit
+    {
+      //add the adjacent blocks in bufferMoves
+      //up
+      if(row>0)
+        bufferMoves.push([row-1,column,"up"]);
+      //left
+      if(column>0)
+        bufferMoves.push([row,column-1,"left"]);
+      //down
+      if(row<9)
+        bufferMoves.push([row+1,column,"down"]);
+      //right
+      if(column<9)
+        bufferMoves.push([row,column+1,"right"]);
+
+      
+      //remove the current entry from availableMoves
+      remove(row,column);
+
+    }
+    else //fire miss
+    {
+      //remove entries from availableMoves
+      remove(row,column)
+    }
+  }
 }
 
 function checkWin()
