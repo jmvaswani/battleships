@@ -1,15 +1,8 @@
-// Tic Tac Toe AI with Minimax Algorithm
-// The Coding Train / Daniel Shiffman
-// https://thecodingtrain.com/CodingChallenges/154-tic-tac-toe-minimax.html
-// https://youtu.be/I64-UTORVfU
-// https://editor.p5js.org/codingtrain/sketches/0zyUhZdJD
-
 //0 black
 //1 ship placed
 //2 fire (miss)
 //3 fire (hit)
 //4 fire (Destroyed)
-
 var playerBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0],
@@ -51,12 +44,6 @@ let rotateButtonActivated=false;
 let resetButtonActivated=false;
 let startButtonActivated=false;
 var boatSelected=-1;//[false,false,false,false,false];
-let board = [  //yeh konsa board hai..?
-  ['', '', ''],
-  ['', '', ''],
-  ['', '', '']
-];
-
 let w; // = width / 3;
 let h; // = height / 3;
 let boardWidth;
@@ -75,68 +62,7 @@ function setup() {
   w = boardWidth / 10;
   h = boardHeight / 10;
   placeComputerBoats();
-
-  // for(let a=0; a<10; a++)
-  // {
-  //   for(let b=0; b<10; b++)
-  //   {
-  //     navin = Math.floor(Math.random() * 10);
-  //     malay = Math.floor(Math.random() * 10);
-  //     playerFire(navin,malay, 'h');
-  //     console.log(navin,malay);
-  //   }
-  // }
-
- // alert(w+","+h);
-  // alert(w*10+10);
-  //bestMove();
 }
-
-function equals3(a, b, c) {
-  return a == b && b == c && a != '';
-}
-
-function checkWinner() {
-  let winner = null;
-
-  // horizontal
-  for (let i = 0; i < 3; i++) {
-    if (equals3(board[i][0], board[i][1], board[i][2])) {
-      winner = board[i][0];
-    }
-  }
-
-  // Vertical
-  for (let i = 0; i < 3; i++) {
-    if (equals3(board[0][i], board[1][i], board[2][i])) {
-      winner = board[0][i];
-    }
-  }
-
-  // Diagonal
-  if (equals3(board[0][0], board[1][1], board[2][2])) {
-    winner = board[0][0];
-  }
-  if (equals3(board[2][0], board[1][1], board[0][2])) {
-    winner = board[2][0];
-  }
-
-  let openSpots = 0;
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      if (board[i][j] == '') {
-        openSpots++;
-      }
-    }
-  }
-
-  if (winner == null && openSpots == 0) {
-    return 'tie';
-  } else {
-    return winner;
-  }
-}
-
 function getButtonClickedOn(x,y)
 {
    if(x>=398&&x<=600)
@@ -160,7 +86,6 @@ function getButtonClickedOn(x,y)
   }
   return -1;
 }
-
 function handleButtons(a)
 {
   if(a==1&&rotateButtonActivated)
@@ -169,7 +94,6 @@ function handleButtons(a)
   }
   else if(a==2&&resetButtonActivated)
   {
-
     for (let i =0;i<5;i++)
     {
       boatsPlaced[i]=false;
@@ -198,7 +122,6 @@ function getBoatClickedOn(x,y)
       let boatTextHeight=570+(i*25);
       if((y>boatTextHeight-15)&&(y<boatTextHeight+5))
       {
-        //alert("HI");
         return i;
       }
     }
@@ -312,18 +235,6 @@ function mousePressed() {
       handleButtons(a);
     }
   }
-  //alert(boatSelected);
-    // if (currentPlayer == human) {
-  //   // Human make turn
-  //   let i = floor(mouseX / w);
-  //   let j = floor(mouseY / h);
-  //   // If valid turn
-  //   if (board[i][j] == '') {
-  //     board[i][j] = human;
-  //     currentPlayer = human;
-  //     bestMove();
-  //   }
-  // }
 }
 /*function getBoatSelected(){
   for(let i=0;i<5;i++)
