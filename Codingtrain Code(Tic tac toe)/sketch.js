@@ -43,10 +43,10 @@ const boatLenghts=[2,3,3,4,5];
 var playerBoatsAlive=[true,true,true,true,true];
 var computerBoatsAlive=[true,true,true,true,true];
 var computerBoatsPoints=[];
+var playerBoatsPoints=[]
 var flag = [0,0,0,0,0];
 //*************
 let boatDirection=0;
-
 let rotateButtonActivated=false;
 let resetButtonActivated=false;
 let startButtonActivated=false;
@@ -64,6 +64,7 @@ let boardHeight;
 let ai = 'X';
 let human = 'O';
 let currentPlayer = human;
+let gameStarted=false;
 var navin;
 var malay;
 
@@ -138,7 +139,7 @@ function checkWinner() {
 
 function getButtonClickedOn(x,y)
 {
-   if(x>=398&&x<=545)
+   if(x>=398&&x<=600)
   {
     if(y>525&&y<545)
     {
@@ -148,11 +149,12 @@ function getButtonClickedOn(x,y)
       }
       else if(x>478&&x<520)
       {
-        return 2;  //2 for rotate
+        return 2;  //2 for Reset
       }
       else if(x>548&&x<590)
       {
-        return 3;  //3 for rotate
+        alert("START");
+        return 3;  //3 for Start
       }
     }
   }
@@ -183,6 +185,7 @@ function handleButtons(a)
   }
   else if(a==3&&startButtonActivated)
   {
+    gameStarted=true;
     //Start code
   }
 }
@@ -207,70 +210,86 @@ function mousePressed() {
   var i = floor((mouseY-10) / h);
   if (i<10 && i>=0)
   {
-    if(j>=0 && j<10)
+    if(gameStarted)
     {
-      if(boatSelected!=-1)
+      if(j>=0 && j<10)
       {
-        if(boatDirection==0)
+        fire(i,j,'c');
+      }
+      else if (j>=11 && j<21)
+      {
+        fire(i,j-11,'h');
+      }
+    }
+    else
+    {
+      if(j>=0 && j<10)
+      {
+        if(boatSelected!=-1)
         {
-        if(i<=10-boatLenghts[boatSelected])
-        {
-          let f=0;
-          for(let k=0;k<boatLenghts[boatSelected];k++)
+          if(boatDirection==0)
           {
-            if(playerBoard[i+k][j]==1)
-            {
-              f=1;
-            }
-          }
-          if(f==1)
-            alert("Boat overlap");
-          else
+          if(i<=10-boatLenghts[boatSelected])
           {
+            let f=0;
             for(let k=0;k<boatLenghts[boatSelected];k++)
             {
-              playerBoard[i+k][j]=1;
+              if(playerBoard[i+k][j]==1)
+              {
+                f=1;
+              }
+            }
+            if(f==1)
+              alert("Boat overlap");
+            else
+            {
+              for(let k=0;k<boatLenghts[boatSelected];k++)
+              {
+                playerBoard[i+k][j]=1;
+                playerBoatsPoints.push([boats[boatSelected],i+k,j]);
+              }
+              playerBoatsPositions[boatSelected]=[i,j,boatDirection];
+              boatsPlaced[boatSelected]=true;
+              boatSelected=-1;
+            }
+          }
+          else{
+            alert("Invalid placement");
+          }
+        }
+        else
+        {
+          if(j<=10-boatLenghts[boatSelected])
+          {
+            let f=0;
+            for(let k=0;k<boatLenghts[boatSelected];k++)
+            {
+              if(playerBoard[i][j+k]==1)
+              {
+                f=1;
+              }
+            }
+            if(f==1)
+              alert("Boat overlap");
+            else
+            {
+            for(let k=0;k<boatLenghts[boatSelected];k++)
+            {
+              playerBoard[i][j+k]=1;
+              playerBoatsPoints.push([boats[boatSelected],i,j+k]);
             }
             playerBoatsPositions[boatSelected]=[i,j,boatDirection];
             boatsPlaced[boatSelected]=true;
             boatSelected=-1;
-          }
-        }
-        else{
-          alert("Invalid placement");
-        }
-      }
-      else
-      {
-        if(j<=10-boatLenghts[boatSelected])
-        {
-          let f=0;
-          for(let k=0;k<boatLenghts[boatSelected];k++)
-          {
-            if(playerBoard[i][j+k]==1)
-            {
-              f=1;
             }
           }
-          if(f==1)
-            alert("Boat overlap");
-          else
-          {
-          for(let k=0;k<boatLenghts[boatSelected];k++)
-          {
-            playerBoard[i][j+k]=1;
-          }
-          playerBoatsPositions[boatSelected]=[i,j,boatDirection];
-          boatsPlaced[boatSelected]=true;
-          boatSelected=-1;
+          else{
+            alert("Invalid placement");
           }
         }
-        else{
-          alert("Invalid placement");
         }
       }
-      }
-    }
+  }
     /*if((j>=0 && j<10)||(j>11 && j<21))
     {
       playerBoard[i][j]=playerBoard[i][j]==0?1:0;
@@ -370,7 +389,7 @@ function draw() {
       boatsPlacedCount++;
   }
 
-  if(boatsPlacedCount>0)
+  if(boatsPlacedCount>0 && !gameStarted)
   {
     resetButtonActivated=true;
     fill(255, 51, 51);
@@ -382,7 +401,7 @@ function draw() {
   else
     resetButtonActivated=false
 
-  if(boatsPlacedCount==5)
+  if(boatsPlacedCount==5 && !gameStarted)
   {
     startButtonActivated=true;
     fill(102, 255, 102);
@@ -395,6 +414,7 @@ function draw() {
     startButtonActivated=false;
 
 //***************************************************Drawing selected boxes if any
+
     for (let i=0;i<10;i++)
   {
     for (let j=0;j<10;j++)
@@ -403,6 +423,18 @@ function draw() {
       {
         //translate(10+(j*w),10+(i*w));
         fill(color(204, 102, 0));
+        rect( (j*w)+13,(i*h)+13, 40,40);
+        translate(0,0);
+      }else if(playerBoard[i][j]==2){
+        fill(color(255));
+        rect( (j*w)+13,(i*h)+13, 40,40);
+        translate(0,0);
+      }else if(playerBoard[i][j]==3){
+        fill(color(0, 128, 0));
+        rect( (j*w)+13,(i*h)+13, 40,40);
+        translate(0,0);
+      }else if(playerBoard[i][j]==4){
+        fill(color(255, 0, 0));
         rect( (j*w)+13,(i*h)+13, 40,40);
         translate(0,0);
       }
@@ -417,6 +449,10 @@ function draw() {
     {
       //translate(10+(j*w),10+(i*w));
       fill(color(50, 101, 201));
+      rect( (j*w)+505,(i*h)+13, 40,40);
+      translate(0,0); 
+    }else if(computerBoard[i][j]==2){
+      fill(color(255));
       rect( (j*w)+505,(i*h)+13, 40,40);
       translate(0,0);
     }else if(computerBoard[i][j]==3){
@@ -521,71 +557,87 @@ textSize(12);
   }*/
 }
 //###########################################AI logic and functions
-function playerFire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
+function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
   var k;
   var l;
+  var board,boatsPoints;
     // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
     // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
     if(player == 'h')
     {
-      if(computerBoard[i][j] == 0)
-      {
-        computerBoard[i][j] = 2;
-      }else if(computerBoard[i][j] == 1){
-        computerBoard[i][j] = 3;
-        for(k = 0; k< computerBoatsPoints.length; k++){
+      board=computerBoard;
+      boatsPoints=computerBoatsPoints;
+    }
+    else
+    {
+      board=playerBoard;
+      boatsPoints=playerBoatsPoints;
+    }
+    if(board[i][j] == 0)
+    {
+      board[i][j] = 2;
+    }else if(board[i][j] == 1){
+      board[i][j] = 3;
+      for(k = 0; k< boatsPoints.length; k++){
+        // console.log("HEllo");
+        if(i == boatsPoints[k][1] && j == boatsPoints[k][2]){
           // console.log("HEllo");
-          if(i == computerBoatsPoints[k][1] && j == computerBoatsPoints[k][2]){
-            // console.log("HEllo");
-            switch(computerBoatsPoints[k][0]){
-              case "patrolboat":
-                flag[0]++;
-                if(flag[0] == 2){
-                  for(l=0; l<2;l++){
-                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
-                  }
+          switch(boatsPoints[k][0]){
+            case "patrolboat":
+              flag[0]++;
+              if(flag[0] == 2){
+                for(l=0; l<2;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
                 }
-                break;
-              case "battleship":
-                flag[1]++;
-                if(flag[1] == 3){
-                  for(l=2; l<5;l++){
-                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
-                  }
+              }
+              break;
+            case "battleship":
+              flag[1]++;
+              if(flag[1] == 3){
+                for(l=2; l<5;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
                 }
-                break;
-              case "submarine":
-                flag[2]++;
-                if(flag[2] == 3){
-                  for(let l=5; l<8;l++){
-                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
-                  }
+              }
+              break;
+            case "submarine":
+              flag[2]++;
+              if(flag[2] == 3){
+                for(let l=5; l<8;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
                 }
-                break;
-              case "aircraft carrier":
-                flag[3]++;
-                if(flag[3] == 4){
-                  for(let l=8; l<12;l++){
-                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
-                  }
+              }
+              break;
+            case "aircraft carrier":
+              flag[3]++;
+              if(flag[3] == 4){
+                for(let l=8; l<12;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
                 }
-                console.log("hello");
-                break;
-              case "Motherboat":
-                flag[4]++;
-                if(flag[4] == 5){
-                  for(let l=12; l<17;l++){
-                    computerBoard[computerBoatsPoints[l][1]][computerBoatsPoints[l][2]] = 4;
-                  }
+              }
+              console.log("hello");
+              break;
+            case "Motherboat":
+              flag[4]++;
+              if(flag[4] == 5){
+                for(let l=12; l<17;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
                 }
-                break;
-            }
+              }
+              break;
           }
         }
       }
-    }else{
-
+    }
+    if(player == 'h')
+    {
+      computerBoard=board;
+      computerBoatsPoints=boatsPoints;
+    }
+    else
+    {
+      playerBoard=board;
+      playerBoatsPoints=boatsPoints;
     }
   }
 
