@@ -494,7 +494,7 @@ function remove(row,column)
 
 }
 
-function computerTurn()      
+function computerTurn()
 {
   /*
   Function returns [i,j] to indicate where to hit
@@ -511,7 +511,7 @@ function computerTurn()
     direction = tuple[2]; //string "up","down","right","left"
 
     //fire current block
-    fire(row,column,"AI");
+    fire(row,column,"c");
 
     if(playerBoard[row][column] == 1) // Fire hit
     {
@@ -537,7 +537,7 @@ function computerTurn()
     }
   }
 
-  else if(probableMoves.length>0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
+  else if(probableMoves.length > 0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
   {
     tuple = probableMoves.shift();
     row = tuple[0];
@@ -545,7 +545,7 @@ function computerTurn()
     direction = tuple[2];
 
     //fire current block
-    fire(row,column,"AI");
+    fire(row,column,"c");
     
     if(playerBoard[row][column] == 1) // Fire hit
     {
@@ -595,7 +595,7 @@ function computerTurn()
     column = availableMoves[row][columnIndex];
 
     //fire current block
-    fire(row,column,"AI");
+    fire(row,column,"c");
 
     if(playerBoard[row][column] == 1) // Fire hit
     {
@@ -624,7 +624,6 @@ function computerTurn()
       remove(row,column)
     }
   }
-
 
 }
 
