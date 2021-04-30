@@ -27,6 +27,21 @@ var computerBoard=[
   [0,0,0,0,0,0,0,0,0,0],
   [0,0,0,0,0,0,0,0,0,0]
 ];
+
+availableMoves={   //has available moves => choose random moves from here to avoid conflicts
+    0 : [0,1,2,3,4,5,6,7,8,9],
+    1 : [0,1,2,3,4,5,6,7,8,9],
+    2 : [0,1,2,3,4,5,6,7,8,9],
+    3 : [0,1,2,3,4,5,6,7,8,9],
+    4 : [0,1,2,3,4,5,6,7,8,9],
+    5 : [0,1,2,3,4,5,6,7,8,9],
+    6 : [0,1,2,3,4,5,6,7,8,9],
+    7 : [0,1,2,3,4,5,6,7,8,9],
+    8 : [0,1,2,3,4,5,6,7,8,9],
+    9 : [0,1,2,3,4,5,6,7,8,9],
+  };
+
+
 //************* Boat data
 var boats=["patrolboat","battleship","submarine","aircraft carrier","Motherboat"];
 var boatsPlaced=[false,false,false,false,false];
@@ -38,6 +53,9 @@ var computerBoatsAlive=[true,true,true,true,true];
 var computerBoatsPoints=[];
 var playerBoatsPoints=[]
 var flag = [0,0,0,0,0];
+var probableMoves = []  //will have position + direction   => eg. if i,j is a hit , then mark (i-1,j,"up")  to indicate to hit only in the up direction next
+var bufferMoves = []  //to store only the possibleMoves of a particular position and its adjacent (if any one of the moves in bufferMoves is a hit then add to possibleMoves)
+
 //*************
 let boatDirection=0;
 let rotateButtonActivated=false;
