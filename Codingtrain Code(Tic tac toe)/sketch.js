@@ -148,6 +148,7 @@ function getBoatClickedOn(x,y)
   return -1;
 }
 function mousePressed() {
+  //alert("CLICKED");
   var j = floor((mouseX-10) / w);
   var i = floor((mouseY-10) / h);
   if (i<10 && i>=0)
@@ -158,9 +159,10 @@ function mousePressed() {
       {
         fire(i,j,'c');
       }
-      else if (j>=11 && j<21)
+       if (j>=11 && j<21)
       {
         fire(i,j-11,'h');
+        computerTurn();
       }
     }
     else
@@ -254,6 +256,7 @@ function mousePressed() {
       handleButtons(a);
     }
   }
+  //alert("CLICK");
 }
 /*function getBoatSelected(){
   for(let i=0;i<5;i++)
@@ -470,10 +473,10 @@ function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoa
         if(boatsAlive[boatindex]){
           for(pointcheck=0;pointcheck<boatsPoints[boatindex].length;pointcheck++)
         {
-          console.log("Checkpoint0"); 
+          //console.log("Checkpoint0"); 
           if (boatsPoints[boatindex][pointcheck][0]==i && boatsPoints[boatindex][pointcheck][1]==j)
             {
-              console.log("Checkpoint1");
+             // console.log("Checkpoint1");
               board[i][j]=3;
               found=true;
               boatsFlags[boatindex]++;
@@ -569,7 +572,7 @@ function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoa
     }
   }
 
-function opposite(direction)
+function oppositee(direction)
 {
   if(direction == "up")
     return("down");
@@ -581,7 +584,7 @@ function opposite(direction)
     return("right");
 }
 
-function remove(row,column)
+function rem(row,column)
 {
   colIndex = availableMoves[row].indexOf(column);
   if (colIndex!=-1)
@@ -593,13 +596,14 @@ function remove(row,column)
 
 function computerTurn()      
 {
+  let tuple,row,column,direction;
   /*
   Function returns [i,j] to indicate where to hit
   Decided based on
   1)adjacent squares of already hit tiles(hit tiles do not count if ship destroyed)
   2)Random generated intelligent [i,j] such that it neglects  impossible places(single tiles)
   */
-
+console.log(bufferMoves);
   if(bufferMoves.length > 0) //play move in bufferMoves ;  check if hit/miss ; if hit => add (move+direction) & (oppositeMove+direction) to probableMoves ; clear buffer
   {
     tuple = bufferMoves.shift();
@@ -610,18 +614,34 @@ function computerTurn()
     //fire current block
     fire(row,column,"c");
 
-    if(playerBoard[row][column] == 1) // Fire hit
+    if(playerBoard[row][column] == 3) // Fire hit
     {
       //add opposite side if possible
-      opposite = opposite(direction)
+      opposite = oppositee(direction)
       for(i=0;i<bufferMoves.length;i++)
       {
         if(bufferMoves[i][2] == opposite)
           probableMoves.push(bufferMoves[i]);
       }
-      
-      //remove the current entry from availableMoves
-      remove(row,column);
+      // To add Maananiya blocks
+      if(direction == "up")
+        if(row>0)
+          probableMoves.push([row-1,column,"up"]);
+      //left
+      if(direction == "left")
+        if(column>0)
+          probableMoves.push([row,column-1,"left"]);
+      //down
+      if(direction == "down")
+        if(row<9)
+          probableMoves.push([row+1,column,"down"]);
+      //right
+      if(direction == "right")
+        if(column<9)
+          probableMoves.push([row,column+1,"right"]);
+
+      //rem the current entry from availableMoves
+      rem(row,column);
       
       //clear Buffer
       bufferMoves = [];
@@ -629,22 +649,22 @@ function computerTurn()
     }
     else //fire miss
     {
-      //remove entries from availableMoves
-      remove(row,column)
+      //rem entries from availableMoves
+      rem(row,column)
     }
   }
 
   else if(probableMoves.length>0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
   {
-    tuple = probableMoves.shift();
-    row = tuple[0];
-    column = tuple[1];
+     tuple = probableMoves.shift();
+     row = tuple[0];
+     column = tuple[1];
     direction = tuple[2];
 
     //fire current block
     fire(row,column,"c");
     
-    if(playerBoard[row][column] == 1) // Fire hit
+    if(playerBoard[row][column] == 3) // Fire hit
     {
 
       //add the next block of the same direction
@@ -665,14 +685,14 @@ function computerTurn()
           probableMoves.push([row,column+1,"right"]);
 
       
-      //remove the current entry from availableMoves
-      remove(row,column);
+      //rem the current entry from availableMoves
+      rem(row,column);
 
     }
     else //fire miss
     {
-      //remove entries from availableMoves
-      remove(row,column)
+      //rem entries from availableMoves
+      rem(row,column)
     }
 
   }
@@ -684,17 +704,17 @@ function computerTurn()
     {
       rowIndex = Math.floor(Math.random() * 10);
       if(availableMoves[rowIndex].length > 0 )
-        columnIndex = Math.floor(Math.random() * availableMoves[row].length);  //only choose a column number  
+        columnIndex = Math.floor(Math.random() * availableMoves[rowIndex].length);  //only choose a column number  
 
     }while(columnIndex==-1)
 
     row = rowIndex;
     column = availableMoves[row][columnIndex];
-
+  //console.log("CHECKPOINT");
     //fire current block
     fire(row,column,"c");
-
-    if(playerBoard[row][column] == 1) // Fire hit
+    //console.log("CHECKPOINT2");
+    if(playerBoard[row][column] == 3) // Fire hit
     {
       //add the adjacent blocks in bufferMoves
       //up
@@ -710,15 +730,19 @@ function computerTurn()
       if(column<9)
         bufferMoves.push([row,column+1,"right"]);
 
+ //   console.log("CHECKPOINT3");
       
-      //remove the current entry from availableMoves
-      remove(row,column);
+      //rem the current entry from availableMoves
+      rem(row,column);
+ //     console.log("CHECKPOINT4");
 
     }
     else //fire miss
     {
-      //remove entries from availableMoves
-      remove(row,column)
+ //   console.log("CHECKPOINT2");
+
+      //rem entries from availableMoves
+      rem(row,column)
     }
   }
 }
