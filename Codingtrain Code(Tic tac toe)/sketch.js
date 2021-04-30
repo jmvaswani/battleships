@@ -732,6 +732,80 @@ function checkWin()
   */
 }
 
+function placeBoatVertical(direction,length,i)
+{
+  let flag=0
+  let cordinateI;
+  let cordinateJ;
+  do
+  {
+    flag=0
+    cordinateI = Math.floor(Math.random() * 10);
+    cordinateJ = Math.floor(Math.random() * 10);
+
+    if(cordinateI+length < 10)
+    {
+      for(j=0; j<length; j++)
+      {
+        if(computerBoard[cordinateI+j][cordinateJ] != 0)
+        {
+          flag = 1;
+          continue;
+        }
+      }
+    }
+    else
+      flag=1;
+  }while(flag!=0);
+
+  for(j=0; j<length; j++)
+  {
+    computerBoard[cordinateI+j][cordinateJ] = 1;
+  }
+  computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
+}
+
+function placeBoatHorizontal(direction,length,i)
+{
+  let flag=0
+  let cordinateI;
+  let cordinateJ;
+  do
+  {
+    flag=0
+    cordinateI = Math.floor(Math.random() * 10);
+    cordinateJ = Math.floor(Math.random() * 10);
+
+    if(cordinateJ+length < 10)
+    {
+      for(j=0; j<length; j++)
+      {
+        if(computerBoard[cordinateI][cordinateJ+j] != 0)
+        {
+          flag = 1;
+          continue;
+        }
+      }
+    }
+    else
+      flag=1;
+  }while(flag!=0);
+
+  for(j=0; j<length; j++)
+  {
+    computerBoard[cordinateI][cordinateJ+j] = 1;
+  }
+  computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
+}
+
+function placeBoat(direction,length,i)
+{
+  if(direction == 0)
+    placeBoatVertical(direction,length,i);
+  else
+    placeBoatHorizontal(direction,length,i);
+}
+
 function placeComputerBoats()
 {
   /*
@@ -740,99 +814,15 @@ function placeComputerBoats()
   //Make changes in computerBoard, make changes in computerBoatsPositions
   */
  var length;
- var cordinateI;
- var cordinateJ;
  var direction;
  var i;
- var j;
- var k;
- var flag;
  for(i=0; i<5; i++)
  {
    length = boatLenghts[i];
    
-   //create a function to place the boat in a specific direction and let it loop
    direction = Math.floor(Math.random() * 2);
-   cordinateI = Math.floor(Math.random() * 10);
-   cordinateJ = Math.floor(Math.random() * 10);
-   if(direction == 0)   //Vertical
-   {
-     if(cordinateI+length < 10)
-     {
-       for(j=0; j<length; j++)
-       {
-         if(computerBoard[cordinateI+j][cordinateJ] != 0)
-         {
-           flag = 1;
-           break;
-         }
-       }
-
-       if(flag == 0)
-       {
-         for(j=0; j<length; j++)
-         {
-           computerBoard[cordinateI+j][cordinateJ] = 1;
-           computerBoatsPoints[i].push([cordinateI+j,cordinateJ]);
-         }
-        computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
-        
-       }
-       else
-       {
-         i--;
-       }
-    }
-    else
-    {
-      i--;
-    }
-  }
-
-
-  else if(direction == 1)
-  {
-    // console.log(length);
-    if(cordinateJ+length < 10)
-    {
-      for(k=0; k<length; k++)
-      {
-        if(computerBoard[cordinateI][cordinateJ+k] == 0)
-        {
-          flag = 0;
-        }
-        else
-        {
-          flag = 1;
-          break;
-        }
-      }
-      if(flag == 0)
-      {
-        for(k=0; k<length; k++)
-        {
-          computerBoard[cordinateI][cordinateJ+k] = 1;
-          computerBoatsPoints[i].push([cordinateI,cordinateJ+k]);
-        }
-        computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
-      }
-      else
-      {
-        i--;
-      }
-    }
-     else
-     {
-       i--;
-     }
-   }
-  //  console.log(direction);
-  //  for(k=0; k<10; k++)
-  //  {
-  //   direction = Math.floor(Math.random() * 2);
-  //   console.log(direction);
-  //  }
+   //create a function to place the boat in a specific direction and let it loop
+   //call a func to place the boats
+   placeBoat(direction,length,i);
  }
- console.log(computerBoatsPoints);
-//  console.log(computerBoatsPoints[0][1]);
 }
