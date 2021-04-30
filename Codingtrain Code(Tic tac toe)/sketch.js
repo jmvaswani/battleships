@@ -761,6 +761,7 @@ function placeBoatVertical(direction,length,i)
   for(j=0; j<length; j++)
   {
     computerBoard[cordinateI+j][cordinateJ] = 1;
+    computerBoatsPoints[i].push([cordinateI+j,cordinateJ])
   }
   computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
 }
@@ -794,6 +795,7 @@ function placeBoatHorizontal(direction,length,i)
   for(j=0; j<length; j++)
   {
     computerBoard[cordinateI][cordinateJ+j] = 1;
+    computerBoatsPoints[i].push([cordinateI,cordinateJ+j])
   }
   computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
 }
