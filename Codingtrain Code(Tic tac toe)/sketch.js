@@ -50,8 +50,10 @@ var computerBoatsPositions=[[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-1],[-1,-1,-
 const boatLenghts=[2,3,3,4,5];
 var playerBoatsAlive=[true,true,true,true,true];
 var computerBoatsAlive=[true,true,true,true,true];
-var computerBoatsPoints=[];
-var playerBoatsPoints=[]
+var computerBoatsPoints=[[],[],[],[],[]];
+var computerBoatsFlags=[0,0,0,0,0];
+var playerBoatsFlags=[0,0,0,0,0];
+var playerBoatsPoints=[[],[],[],[],[]]
 var flag = [0,0,0,0,0];
 var probableMoves = []  //will have position + direction   => eg. if i,j is a hit , then mark (i-1,j,"up")  to indicate to hit only in the up direction next
 var bufferMoves = []  //to store only the possibleMoves of a particular position and its adjacent (if any one of the moves in bufferMoves is a hit then add to possibleMoves)
@@ -97,7 +99,6 @@ function getButtonClickedOn(x,y)
       }
       else if(x>548&&x<590)
       {
-        alert("START");
         return 3;  //3 for Start
       }
     }
@@ -187,7 +188,7 @@ function mousePressed() {
               for(let k=0;k<boatLenghts[boatSelected];k++)
               {
                 playerBoard[i+k][j]=1;
-                playerBoatsPoints.push([boats[boatSelected],i+k,j]);
+                playerBoatsPoints[boatSelected].push([i+k,j]);
               }
               playerBoatsPositions[boatSelected]=[i,j,boatDirection];
               boatsPlaced[boatSelected]=true;
@@ -217,7 +218,7 @@ function mousePressed() {
             for(let k=0;k<boatLenghts[boatSelected];k++)
             {
               playerBoard[i][j+k]=1;
-              playerBoatsPoints.push([boats[boatSelected],i,j+k]);
+              playerBoatsPoints[boatSelected].push([i,j+k]);
             }
             playerBoatsPositions[boatSelected]=[i,j,boatDirection];
             boatsPlaced[boatSelected]=true;
@@ -433,80 +434,72 @@ text("2)Place on board(with/without rotate)",435,660);
 text("3)Place all ships",435,690);
 text("4)Click on start and play!",435,720);
 textSize(12);
-    /*if (
-      mouseX > bx - boxSize &&
-      mouseX < bx + boxSize &&
-      mouseY > by - boxSize &&
-      mouseY < by + boxSize
-    ) {
-      overBox = true;
-      if (!locked) {
-        stroke(255);
-        fill(244, 122, 158);
-      }
-    } else {
-      stroke(156, 39, 176);
-      fill(244, 122, 158);
-      overBox = false;
-    }*/
-  //line(w, 0, w, height);
-  //line(w * 2, 0, w * 2, height);
-  //line(0, h, width, h);
-  //line(0, h * 2, width, h * 2);
-  //line(0+tW,0+tH,boardWidth+tW,0+tH);
-  // line(0+tW,0+tH,0+tW,boardHeight+tH);
-  // line(0,boardHeight+tH,boardWidth,boardHeight+tH);
-  // line(boardWidth+tW,boardHeight+tH,boardWidth+tW,0);
-  /*for (let j = 0; j < 3; j++) {
-    for (let i = 0; i < 3; i++) {
-      let x = w * i + w / 2;
-      let y = h * j + h / 2;
-      let spot = board[i][j];
-      textSize(32);
-      let r = w / 4;
-      if (spot == human) {
-        noFill();
-        ellipse(x, y, r * 2);
-      } else if (spot == ai) {
-        line(x - r, y - r, x + r, y + r);
-        line(x + r, y - r, x - r, y + r);
-      }
-    }
-  }*/
-/*  let result = checkWinner();
-  if (result != null) {
-    noLoop();
-    let resultP = createP('');
-    resultP.style('font-size', '32pt');
-    if (result == 'tie') {
-      resultP.html('Tie!');
-    } else {
-      resultP.html(`${result} wins!`);
-    }
-  }*/
 }
 //###########################################AI logic and functions
 function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
   var k;
   var l;
-  var board,boatsPoints;
+  var board,boatsPoints,boatsFlags,pointcheck,found=false;
+  //console.log(playerBoatsPoints);
     // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
     // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
     if(player == 'h')
     {
       board=computerBoard;
       boatsPoints=computerBoatsPoints;
+      boatsAlive=computerBoatsAlive;
+      boatsPositions=computerBoatsPositions;
+      boatsFlags=computerBoatsFlags;
     }
     else
     {
       board=playerBoard;
       boatsPoints=playerBoatsPoints;
+      boatsAlive=playerBoatsAlive;
+      boatsPositions=playerBoatsPositions;
+      boatsFlags=playerBoatsFlags;
     }
     if(board[i][j] == 0)
     {
       board[i][j] = 2;
-    }else if(board[i][j] == 1){
+    }else if(board[i][j] == 1)
+    {
+      for(let boatindex=0;boatindex<5;boatindex++)
+      {
+        if(boatsAlive[boatindex]){
+          for(pointcheck=0;pointcheck<boatsPoints[boatindex].length;pointcheck++)
+        {
+          console.log("Checkpoint0"); 
+          if (boatsPoints[boatindex][pointcheck][0]==i && boatsPoints[boatindex][pointcheck][1]==j)
+            {
+              console.log("Checkpoint1");
+              board[i][j]=3;
+              found=true;
+              boatsFlags[boatindex]++;
+              if(boatsFlags[boatindex]==boatLenghts[boatindex])
+              {
+                let row=boatsPositions[boatindex][0];
+                let column=boatsPositions[boatindex][1];
+                let directon=boatsPositions[boatindex][2];
+                if (directon==0)
+                  for(let temp=0;temp<boatLenghts[boatindex];temp++)
+                    board[row+temp][column]=4;
+                else
+                  for(let temp=0;temp<boatLenghts[boatindex];temp++)
+                      board[row][column+temp]=4;
+                boatsAlive[boatindex]=false;
+                console.log(board);
+              }
+              break;
+            }
+        }
+      }
+      if(found)
+        break;
+      }
+    }
+    /*{
       board[i][j] = 3;
       for(k = 0; k< boatsPoints.length; k++){
         // console.log("HEllo");
@@ -557,16 +550,22 @@ function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoa
           }
         }
       }
-    }
+    }*/
     if(player == 'h')
     {
       computerBoard=board;
       computerBoatsPoints=boatsPoints;
+      computerBoatsAlive=boatsAlive;
+      computerBoatsPositions=boatsPositions;
+      computerBoatsFlags=boatsFlags;
     }
     else
     {
       playerBoard=board;
       playerBoatsPoints=boatsPoints;
+      playerBoatsAlive=boatsAlive;
+      playerBoatsPositions=boatsPositions;
+      playerBoatsFlags=boatsFlags;
     }
   }
 
@@ -774,9 +773,10 @@ function placeComputerBoats()
          for(j=0; j<length; j++)
          {
            computerBoard[cordinateI+j][cordinateJ] = 1;
-           computerBoatsPoints.push([boats[i],cordinateI+j,cordinateJ]);
+           computerBoatsPoints[i].push([cordinateI+j,cordinateJ]);
          }
         computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
+        
        }
        else
        {
@@ -812,7 +812,7 @@ function placeComputerBoats()
         for(k=0; k<length; k++)
         {
           computerBoard[cordinateI][cordinateJ+k] = 1;
-          computerBoatsPoints.push([boats[i],cordinateI,cordinateJ+k]);
+          computerBoatsPoints[i].push([cordinateI,cordinateJ+k]);
         }
         computerBoatsPositions[i]=[cordinateI,cordinateJ,direction];
       }
