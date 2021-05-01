@@ -31,7 +31,20 @@
 	console.log(availableMoves[0].splice(2,1)) //only remove 1 element
 	console.log(availableMoves)
 	console.log(x.indexOf(4))
+	console.log(1!=2);
 
+	l = [1,2,3,4]
+	function foo(num)
+	{	
+		console.log(l);
+		l.shift()
+		if(num<4)
+			foo(num+1);
+		console.log(l);
+		l.push(num);
+	}
+
+	foo(0)
 
 	</script>
 

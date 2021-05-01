@@ -438,6 +438,7 @@ text("3)Place all ships",435,690);
 text("4)Click on start and play!",435,720);
 textSize(12);
 }
+
 //###########################################AI logic and functions
 function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
@@ -466,7 +467,8 @@ function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoa
     if(board[i][j] == 0)
     {
       board[i][j] = 2;
-    }else if(board[i][j] == 1)
+    }
+    else if(board[i][j] == 1)
     {
       for(let boatindex=0;boatindex<5;boatindex++)
       {
@@ -570,7 +572,55 @@ function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoa
       playerBoatsPositions=boatsPositions;
       playerBoatsFlags=boatsFlags;
     }
+}
+
+function findAdjacent(row,column)
+{
+  var l=[]
+  if(row>0)
+    l.push([row-1,column])
+  if(row<9)
+    l.push([row+1,column])
+  if(column>0)
+    l.push([row,column-1])
+  if(column<9)
+    l.push([row,column+1])
+
+  return(l)
+}
+
+
+function isBlocked(row,column)
+{
+  //check if the randomly chosen block is blocked or not
+  adjacent = findAdjacent(row,column);
+  for(i=0;i<adjacent.length;i++)
+  {
+    adjrow = adjacent[i][0]
+    adjcolumn = adjacent[i][1];
+
+    if(playerBoard[adjrow][adjcolumn] == 0 || playerBoard[adjrow][adjcolumn]==1 || playerBoard[adjrow][adjcolumn]==3 )
+    { 
+      //console.log("Not blocking the postion ",adjrow,adjcolumn);
+      return(0);
+    }
   }
+  console.log("Blocking ",row,column);
+  return(1);
+
+}
+
+function isAvailable(row, column)
+{
+  //return 1 if available else 0
+
+  var colIndex = availableMoves[row].indexOf(column);
+  if (colIndex!=-1)
+    return(1);//still not been hit
+  else
+    return(0); //no entry in available moves
+
+}
 
 function oppositee(direction)
 {
@@ -586,9 +636,10 @@ function oppositee(direction)
 
 function rem(row,column)
 {
+  var colIndex;
   colIndex = availableMoves[row].indexOf(column);
   if (colIndex!=-1)
-    availableMoves[row].splice(column, 1);
+    availableMoves[row].splice(colIndex, 1);
   else
     console.log("Some error Occured for "+row,colIndex); 
 
@@ -603,17 +654,37 @@ function computerTurn()
   1)adjacent squares of already hit tiles(hit tiles do not count if ship destroyed)
   2)Random generated intelligent [i,j] such that it neglects  impossible places(single tiles)
   */
-console.log(bufferMoves);
+  //console.log(bufferMoves);
+  
+
   if(bufferMoves.length > 0) //play move in bufferMoves ;  check if hit/miss ; if hit => add (move+direction) & (oppositeMove+direction) to probableMoves ; clear buffer
   {
-    tuple = bufferMoves.shift();
-    row = tuple[0];
-    column = tuple[1];
-    direction = tuple[2]; //string "up","down","right","left"
+    //loop of the move is already played
+    do
+    {
+      tuple = bufferMoves.shift();
+      row = tuple[0];
+      column = tuple[1];
+      direction = tuple[2]; //string "up","down","right","left"
+
+      //console.log("bufferMoves while checking ",bufferMoves);
+
+      if(isAvailable(row,column))
+        break;
+      else if(bufferMoves.length == 0)
+      {
+        computerTurn();//call itself to execute another type of approach and after that return to playerMove
+        return;
+      }
+    }while(1);
 
     //fire current block
     fire(row,column,"c");
+    console.log("computer =>",row,column);
 
+    //rem the current entry from availableMoves
+    rem(row,column);
+  
     if(playerBoard[row][column] == 3) // Fire hit
     {
       //add opposite side if possible
@@ -640,29 +711,38 @@ console.log(bufferMoves);
         if(column<9)
           probableMoves.push([row,column+1,"right"]);
 
-      //rem the current entry from availableMoves
-      rem(row,column);
-      
       //clear Buffer
       bufferMoves = [];
 
-    }
-    else //fire miss
-    {
-      //rem entries from availableMoves
-      rem(row,column)
     }
   }
 
   else if(probableMoves.length>0)  //play move from probableMoves ; check hit/miss ; if hit => add move + direction to probableMoves
   {
-     tuple = probableMoves.shift();
-     row = tuple[0];
-     column = tuple[1];
-    direction = tuple[2];
+    do
+    {
+      tuple = probableMoves.shift();
+      row = tuple[0];
+      column = tuple[1];
+      direction = tuple[2];
+
+      if(isAvailable(row,column))
+        break;
+      else if(probableMoves.length==0)
+      {
+        computerTurn();
+        return;
+      }
+    }while(1);
+
 
     //fire current block
     fire(row,column,"c");
+    console.log("computer =>",row,column);
+
+    //rem the current entry from availableMoves
+    rem(row,column);
+
     
     if(playerBoard[row][column] == 3) // Fire hit
     {
@@ -684,35 +764,42 @@ console.log(bufferMoves);
         if(column<9)
           probableMoves.push([row,column+1,"right"]);
 
-      
-      //rem the current entry from availableMoves
-      rem(row,column);
-
-    }
-    else //fire miss
-    {
-      //rem entries from availableMoves
-      rem(row,column)
     }
 
   }
 
   else //play random move => check for hit/miss ; if hit=> add moves to buffer with direction
   { 
-    column=-1
+    var columnIndex=-1,rowIndex;
     do
     {
       rowIndex = Math.floor(Math.random() * 10);
       if(availableMoves[rowIndex].length > 0 )
+      {
         columnIndex = Math.floor(Math.random() * availableMoves[rowIndex].length);  //only choose a column number  
+        row = rowIndex;
+        column = availableMoves[row][columnIndex];
+        
+        //check if the randomly selected block is blocked from all sides
+        if(isBlocked(row,column))
+        { 
+          //if yes then restart he process
+          columnIndex=-1;
+        }
+      }
 
-    }while(columnIndex==-1)
+    }while(columnIndex==-1);
 
-    row = rowIndex;
-    column = availableMoves[row][columnIndex];
+    
   //console.log("CHECKPOINT");
     //fire current block
     fire(row,column,"c");
+    console.log("computer =>",row,column,columnIndex);
+    //console.log(availableMoves);
+
+    //rem the current entry from availableMoves
+    rem(row,column);  
+
     //console.log("CHECKPOINT2");
     if(playerBoard[row][column] == 3) // Fire hit
     {
@@ -730,19 +817,8 @@ console.log(bufferMoves);
       if(column<9)
         bufferMoves.push([row,column+1,"right"]);
 
- //   console.log("CHECKPOINT3");
-      
-      //rem the current entry from availableMoves
-      rem(row,column);
- //     console.log("CHECKPOINT4");
+      //console.log("Inserting ",bufferMoves);
 
-    }
-    else //fire miss
-    {
- //   console.log("CHECKPOINT2");
-
-      //rem entries from availableMoves
-      rem(row,column)
     }
   }
 }
