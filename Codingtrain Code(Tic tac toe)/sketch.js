@@ -241,6 +241,7 @@ function draw() {
   fill(255);
   text('Player board', 160, 500);
   text('Computer board', 700, 500);
+  textSize(15);
   for (let i = 0; i < 5; i++) {
     if (boatsPlaced[i] == false) {
       if (boatSelected == i) {
@@ -253,6 +254,7 @@ function draw() {
       text(boats[i], 100, boatTextHeight);
     }
   }
+  textSize(12);
   //************************************************* Drawing 3 Buttons
   if (boatSelected != -1) {
     rotateButtonActivated = true;
@@ -344,18 +346,18 @@ function draw() {
   textSize(20);
   if (winstatus == 0) {
     textSize(20);
-    text("Instructions", 400, 600);
+    text("Instructions", 370, 600);
     if (gameStarted) {
-      text("1)Fire a shot(Click on computer board)", 385, 630);
-      text("2)Check hit/no hit", 385, 660);
-      text("3)See where computer decided to hit", 385, 690);
-      text("4)Repeat until either player has all ships destroyed", 385, 720)
+      text("1)Fire a shot(Click on computer board)", 355, 630);
+      text("2)Check hit/no hit: Green means hit,Red means ship destroyed", 355, 660);
+      text("3)See where computer decided to hit", 355, 690);
+      text("4)Repeat until either player has all ships destroyed", 355, 720)
     }
     else {
-      text("1)Select a ship", 385, 630);
-      text("2)Place on board(with/without rotate)", 385, 660);
-      text("3)Place all ships", 385, 690);
-      text("4)Click on start and play!", 385, 720);
+      text("1)Select a ship", 355, 630);
+      text("2)Place on board(with/without rotate)", 355, 660);
+      text("3)Place all ships", 355, 690);
+      text("4)Click on start and play!", 355, 720);
     }
     textSize(12);
   }
