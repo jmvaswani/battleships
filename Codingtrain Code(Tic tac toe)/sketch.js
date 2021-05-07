@@ -379,7 +379,7 @@ function draw() {
   }
 }
 //###########################################AI logic and functions
-function fire(i, j, player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
+/*function fire(i, j, player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
 {
   var k;
   var l;
@@ -429,6 +429,7 @@ function fire(i, j, player)      // 0<= I and J <=9    (Function scans computerB
                   board[row][column + temp] = 4;
               boatsAlive[boatindex] = false;
               console.log(board);
+              console.log(boatindex);
             }
             break;
           }
@@ -453,6 +454,142 @@ function fire(i, j, player)      // 0<= I and J <=9    (Function scans computerB
     playerBoatsFlags = boatsFlags;
   }
 }
+*/
+
+function fire(i,j,player)      // 0<= I and J <=9    (Function scans computerBoard and makes the following changes )
+{
+  var k;
+  var l;
+  var board,boatsPoints,boatsFlags,pointcheck,found=false;
+  //console.log(playerBoatsPoints);
+    // After firing, if miss, make computerboard[i][j]=2, if hit but not destroyed, make =3 and if hit and destroyed, make all positions of that boat as =4, as well as change status in computerBoatsAlive
+    // You can use computerBoard to find positions of ships, and to find if all positions on ship destoyed you can use computerBoatsPositions [i,j,direction]
+    if(player == 'h')
+    {
+      board=computerBoard;
+      boatsPoints=computerBoatsPoints;
+      boatsAlive=computerBoatsAlive;
+      boatsPositions=computerBoatsPositions;
+      boatsFlags=computerBoatsFlags;
+    }
+    else
+    {
+      board=playerBoard;
+      boatsPoints=playerBoatsPoints;
+      boatsAlive=playerBoatsAlive;
+      boatsPositions=playerBoatsPositions;
+      boatsFlags=playerBoatsFlags;
+    }
+    if(board[i][j] == 0)
+    {
+      board[i][j] = 2;
+    }
+    else if(board[i][j] == 1)
+    {
+      for(let boatindex=0;boatindex<5;boatindex++)
+      {
+        if(boatsAlive[boatindex]){
+          for(pointcheck=0;pointcheck<boatsPoints[boatindex].length;pointcheck++)
+        {
+          //console.log("Checkpoint0"); 
+          if (boatsPoints[boatindex][pointcheck][0]==i && boatsPoints[boatindex][pointcheck][1]==j)
+            {
+             // console.log("Checkpoint1");
+              board[i][j]=3;
+              found=true;
+              boatsFlags[boatindex]++;
+              if(boatsFlags[boatindex]==boatLenghts[boatindex])
+              {
+                let row=boatsPositions[boatindex][0];
+                let column=boatsPositions[boatindex][1];
+                let directon=boatsPositions[boatindex][2];
+                if (directon==0)
+                  for(let temp=0;temp<boatLenghts[boatindex];temp++)
+                    board[row+temp][column]=4;
+                else
+                  for(let temp=0;temp<boatLenghts[boatindex];temp++)
+                      board[row][column+temp]=4;
+                boatsAlive[boatindex]=false;
+                console.log(board);
+              }
+              break;
+            }
+        }
+      }
+      if(found)
+        break;
+      }
+    }
+    /*{
+      board[i][j] = 3;
+      for(k = 0; k< boatsPoints.length; k++){
+        // console.log("HEllo");
+        if(i == boatsPoints[k][1] && j == boatsPoints[k][2]){
+          // console.log("HEllo");
+          switch(boatsPoints[k][0]){
+            case "patrolboat":
+              flag[0]++;
+              if(flag[0] == 2){
+                for(l=0; l<2;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
+                }
+              }
+              break;
+            case "battleship":
+              flag[1]++;
+              if(flag[1] == 3){
+                for(l=2; l<5;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
+                }
+              }
+              break;
+            case "submarine":
+              flag[2]++;
+              if(flag[2] == 3){
+                for(let l=5; l<8;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
+                }
+              }
+              break;
+            case "aircraft carrier":
+              flag[3]++;
+              if(flag[3] == 4){
+                for(let l=8; l<12;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
+                }
+              }
+              console.log("hello");
+              break;
+            case "Motherboat":
+              flag[4]++;
+              if(flag[4] == 5){
+                for(let l=12; l<17;l++){
+                  board[boatsPoints[l][1]][boatsPoints[l][2]] = 4;
+                }
+              }
+              break;
+          }
+        }
+      }
+    }*/
+    if(player == 'h')
+    {
+      computerBoard=board;
+      computerBoatsPoints=boatsPoints;
+      computerBoatsAlive=boatsAlive;
+      computerBoatsPositions=boatsPositions;
+      computerBoatsFlags=boatsFlags;
+    }
+    else
+    {
+      playerBoard=board;
+      playerBoatsPoints=boatsPoints;
+      playerBoatsAlive=boatsAlive;
+      playerBoatsPositions=boatsPositions;
+      playerBoatsFlags=boatsFlags;
+    }
+}
+
 
 function findAdjacent(row, column) {
   var l = []
